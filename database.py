@@ -14,4 +14,17 @@ def get_users():
 
 
 def update_user(user):
-    pass
+    cursor.execute("""
+    INSERT INTO users(user_id, username, name, messages)
+    VALUES (?, ?, ?, 1)
+    ON CONFLICT(user_id)
+    DO UPDATE SET
+    messages = messages + 1
+    """,
+    (
+        user.id,
+        user.username or "",
+        user.first_name
+    ))
+
+    conn.commit()
