@@ -17,12 +17,15 @@ from ship import choose_ship
 async def track_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if update.message and update.message.from_user:
-        update_user(update.message.from_user)
+        update_user(
+            update.effective_chat.id,
+            update.message.from_user
+        )
 
 
 async def ship_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    users = get_users()
+    users = get_users(update.effective_chat.id)
 
     result = choose_ship(users)
 
