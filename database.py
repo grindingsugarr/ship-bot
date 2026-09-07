@@ -43,6 +43,22 @@ CREATE TABLE IF NOT EXISTS ship_history(
 conn.commit()
 
 
+# =========================
+# INTERACTION TABLE
+# =========================
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS interactions(
+    user1 INTEGER,
+    user2 INTEGER,
+    interactions INTEGER DEFAULT 1,
+    last_interaction TEXT,
+    UNIQUE(user1, user2)
+)
+""")
+
+conn.commit()
+
 
 # =========================
 # UPDATE USER
@@ -92,17 +108,48 @@ def update_user(chat_id, user):
 def get_users(chat_id=None):
 
     cursor.execute("""
-    SELECT
-        user_id,
-        username,
-        name,
-        messages
-    FROM users
-    """)
+SELECT
+    user_id,
+    username,
+    name,
+    messages,
+    last_active
+FROM users
+""")
 
     return cursor.fetchall()
 
 
+
+def save_interaction(user1, user2):
+
+    now = datetime.now().isoformat()
+
+    cursor.execute("""
+    INSERT INTO interactions(
+        user1,
+        user2,
+        interactions,
+        last_interaction
+    )
+
+    VALUES(?,?,1,?)
+
+    ON CONFLICT(user1,user2)
+
+    DO UPDATE SET
+
+    interactions = interactions + 1,
+    last_interaction = excluded.last_interaction
+
+    """,
+    (
+        user1,
+        user2,
+        now
+    ))
+
+    conn.commit()
 
 # =========================
 # SAVE SHIP RESULT
