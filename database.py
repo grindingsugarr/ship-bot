@@ -1,7 +1,10 @@
 import sqlite3
+import os
 from datetime import datetime
 
-
+if os.path.exists("users.db"):
+    os.remove("users.db")
+    
 conn = sqlite3.connect(
     "users.db",
     check_same_thread=False
