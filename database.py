@@ -10,9 +10,9 @@ conn = sqlite3.connect(
 cursor = conn.cursor()
 
 
-# ======================
-# USER TABLE
-# ======================
+# =========================
+# USERS TABLE
+# =========================
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS users(
@@ -25,27 +25,9 @@ CREATE TABLE IF NOT EXISTS users(
 """)
 
 
-# ======================
-# INTERACTION TABLE
-# ======================
-
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS interactions(
-    user1 INTEGER,
-    user2 INTEGER,
-    reply_count INTEGER DEFAULT 0,
-    mention_count INTEGER DEFAULT 0,
-    score INTEGER DEFAULT 0,
-    updated TEXT,
-
-    PRIMARY KEY(user1,user2)
-)
-""")
-
-
-# ======================
+# =========================
 # SHIP HISTORY
-# ======================
+# =========================
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS ship_history(
@@ -62,7 +44,11 @@ conn.commit()
 
 
 
-def update_user(user):
+# =========================
+# UPDATE USER
+# =========================
+
+def update_user(chat_id, user):
 
     now = datetime.now().isoformat()
 
@@ -81,21 +67,17 @@ def update_user(user):
 
     DO UPDATE SET
 
-    username=?,
-    name=?,
-    messages=messages+1,
-    last_active=?
+        username = excluded.username,
+        name = excluded.name,
+        messages = messages + 1,
+        last_active = excluded.last_active
 
     """,
     (
         user.id,
-        user.username or "",
-        user.full_name or "",
+        user.username,
+        user.full_name,
         1,
-        now,
-
-        user.username or "",
-        user.full_name or "",
         now
     ))
 
@@ -103,98 +85,18 @@ def update_user(user):
 
 
 
-def add_interaction(
-    user1,
-    user2,
-    interaction_type="reply"
-):
+# =========================
+# GET USERS
+# =========================
 
-    if user1 == user2:
-        return
-
-
-    a,b = sorted(
-        [user1,user2]
-    )
-
-
-    if interaction_type == "reply":
-
-        cursor.execute("""
-        INSERT INTO interactions(
-            user1,
-            user2,
-            reply_count,
-            score,
-            updated
-        )
-
-        VALUES(?,?,?,?,?)
-
-        ON CONFLICT(user1,user2)
-
-        DO UPDATE SET
-
-        reply_count=reply_count+1,
-        score=score+3,
-        updated=?
-
-        """,
-        (
-            a,
-            b,
-            1,
-            3,
-            datetime.now().isoformat(),
-            datetime.now().isoformat()
-        ))
-
-
-    elif interaction_type == "mention":
-
-        cursor.execute("""
-        INSERT INTO interactions(
-            user1,
-            user2,
-            mention_count,
-            score,
-            updated
-        )
-
-        VALUES(?,?,?,?,?)
-
-        ON CONFLICT(user1,user2)
-
-        DO UPDATE SET
-
-        mention_count=mention_count+1,
-        score=score+2,
-        updated=?
-
-        """,
-        (
-            a,
-            b,
-            1,
-            2,
-            datetime.now().isoformat(),
-            datetime.now().isoformat()
-        ))
-
-
-    conn.commit()
-
-
-
-def get_users():
+def get_users(chat_id=None):
 
     cursor.execute("""
     SELECT
-    user_id,
-    username,
-    name,
-    messages
-
+        user_id,
+        username,
+        name,
+        messages
     FROM users
     """)
 
@@ -202,34 +104,30 @@ def get_users():
 
 
 
-def get_interaction(
-    user1,
-    user2
-):
+# =========================
+# SAVE SHIP RESULT
+# =========================
 
-    a,b = sorted(
-        [user1,user2]
-    )
+def save_ship(user1, user2, compatibility):
 
+    now = datetime.now().isoformat()
 
     cursor.execute("""
-    SELECT score
-    FROM interactions
+    INSERT INTO ship_history(
+        user1,
+        user2,
+        compatibility,
+        created_at
+    )
 
-    WHERE user1=? AND user2=?
+    VALUES(?,?,?,?)
 
     """,
     (
-        a,
-        b
+        user1,
+        user2,
+        compatibility,
+        now
     ))
 
-
-    result = cursor.fetchone()
-
-
-    if result:
-        return result[0]
-
-
-    return 0
+    conn.commit()
