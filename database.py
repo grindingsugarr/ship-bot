@@ -4,7 +4,7 @@ conn = sqlite3.connect("users.db", check_same_thread=False)
 cursor = conn.cursor()
 
 
-def get_users():
+def get_users(chat_id=None):
     cursor.execute("""
         SELECT user_id, username, name, messages
         FROM users
