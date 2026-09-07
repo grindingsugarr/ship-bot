@@ -14,7 +14,7 @@ def get_users(chat_id=None):
     return cursor.fetchall()
 
 
-def update_user(user):
+def update_user(user_id, user):
 
     cursor.execute("""
     INSERT INTO users(user_id, messages)
