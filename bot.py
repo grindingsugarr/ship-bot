@@ -38,7 +38,7 @@ async def ship_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     a, b = result
 
     username1 = a[1] if a[1] else a[2]
-username2 = b[1] if b[1] else b[2]
+    username2 = b[1] if b[1] else b[2]
 
     chance = random.randint(50, 100)
 
