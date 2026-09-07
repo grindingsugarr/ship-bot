@@ -35,12 +35,10 @@ async def ship_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    a, b = result
+    a, b, compatibility = result
 
-    username1 = a[1] if a[1] else a[2]
-    username2 = b[1] if b[1] else b[2]
-
-    chance = random.randint(50, 100)
+    username1 = f"@{a[1]}" if a[1] else a[2]
+    username2 = f"@{b[1]}" if b[1] else b[2]
 
     text = f"""
 💘 SHIP OF THE MOMENT 💘
@@ -48,11 +46,15 @@ async def ship_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 <a href="tg://user?id={a[0]}">{username1}</a> ❤️ <a href="tg://user?id={b[0]}">{username2}</a>
 
 Compatibility:
-🔥 {chance}%
+🔥 {compatibility}%
 
-Dipilih berdasarkan:
-• Aktivitas grup
-• Random matchmaking
+📊 Analisis:
+• Aktivitas grup tinggi
+• Sering muncul dalam percakapan
+• Belum pernah dipasangkan sebelumnya
+
+✨ Match reason:
+"Sering berinteraksi dalam grup"
 """
 
     await update.message.reply_text(
