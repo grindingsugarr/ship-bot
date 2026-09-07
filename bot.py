@@ -45,7 +45,7 @@ async def ship_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = f"""
 💘 SHIP OF THE MOMENT 💘
 
-@{username1} ❤️ @{username2}
+<a href="tg://user?id={a[0]}">{username1}</a> ❤️ <a href="tg://user?id={b[0]}">{username2}</a>
 
 Compatibility:
 🔥 {chance}%
@@ -55,8 +55,11 @@ Dipilih berdasarkan:
 • Random matchmaking
 """
 
-    await update.message.reply_text(text)
-
+    await update.message.reply_text(
+              text,
+              parse_mode="HTML",
+    disable_web_page_preview=True
+)
 
 def main():
 
